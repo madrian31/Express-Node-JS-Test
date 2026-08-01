@@ -8,18 +8,66 @@ app.use(express.json());
 
 const PORT = 5000;
 
-app.get("/api/message", (req, res) => {
-    res.json({
-        message: "Hello from the server!",
-        corsTest: "CORS IS WORKING"
-    });
+let users = [
+    { id: 1, name: "Juan", age: 25 },
+    { id: 2, name: "Pedro", age: 30 }
+];
+
+// READ
+app.get("/api/users", (req, res) => {
+    res.json(users);
 });
 
-app.post("/api/greet", (req, res) => {
-    const { name } = req.body;
+// CREATE
+app.post("/api/users", (req, res) => {
+    const { name, age } = req.body;
+
+    const newUser = {
+        id: users.length + 1,
+        name: name,
+        age: age
+    };
+
+    users.push(newUser);
+
+    res.json(newUser);
+});
+
+// UPDATE
+app.put("/api/users/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const { name, age } = req.body;
+
+    const user = users.find((user) => user.id === id);
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    user.name = name;
+    user.age = age;
+
+    res.json(user);
+});
+
+// DELETE
+app.delete("/api/users/:id", (req, res) => {
+    const id = Number(req.params.id);
+
+    const userExists = users.some((user) => user.id === id);
+
+    if (!userExists) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    users = users.filter((user) => user.id !== id);
 
     res.json({
-        message: `Hello, ${name}!`
+        message: "User deleted successfully"
     });
 });
 
